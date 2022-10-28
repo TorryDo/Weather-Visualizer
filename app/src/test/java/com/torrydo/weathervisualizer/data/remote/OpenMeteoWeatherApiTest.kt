@@ -1,5 +1,6 @@
 package com.torrydo.weathervisualizer.data.remote
 
+import com.google.common.truth.Truth.assertThat
 import com.torrydo.weathervisualizer.common.model.onError
 import com.torrydo.weathervisualizer.common.model.onSuccess
 import kotlinx.coroutines.runBlocking
@@ -28,13 +29,11 @@ class OpenMeteoWeatherApiTest {
         val lon = 106.8
 
         runBlocking {
-            api.getWeather(lat = lat, lon = lon)
-                .onSuccess {
-                    println(it.toString())
-                }
-                .onError { exception, data ->
-                    println(exception?.stackTraceToString() ?: "")
-                }
+            val rs = api.getWeather(lat = lat, lon = lon)
+
+            assertThat(rs.exception).isNull()
+            assertThat(rs.data).isNotNull()
+
         }
 
     }

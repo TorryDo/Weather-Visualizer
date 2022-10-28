@@ -1,5 +1,6 @@
 package com.torrydo.weathervisualizer.data.remote
 
+import com.torrydo.weathervisualizer.common.error.DefaultError
 import com.torrydo.weathervisualizer.common.model.Resource
 import com.torrydo.weathervisualizer.utils.Logger
 import io.ktor.client.*
@@ -14,7 +15,7 @@ import kotlinx.serialization.json.Json
 class OpenMeteoWeatherApi {
 
     private val URL_SOURCE =
-        "https://api.open-meteo.com/v1/forecast?&hourly=temperature_2m,relativehumidity_2m,windspeed_10m,weathercode,pressure_msl&{latitude}&{longitude}"
+        "https://api.open-meteo.com/v1/forecast?&hourly=temperature_2m,relativehumidity_2m,windspeed_10m,weathercode,pressure_msl&timezone=Asia%2FBangkok&{latitude}&{longitude}"
 
 
     private val jsonFormat = Json { ignoreUnknownKeys = true }
@@ -35,7 +36,7 @@ class OpenMeteoWeatherApi {
 
             Resource.Success(openMeteoDto)
         } catch (e: Exception) {
-            Resource.Error(e)
+            Resource.Error(DefaultError(e.stackTraceToString()))
         }
 
     }

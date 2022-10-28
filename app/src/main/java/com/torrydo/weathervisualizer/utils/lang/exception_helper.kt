@@ -1,6 +1,7 @@
 package com.torrydo.weathervisualizer.utils.lang
 
 import android.util.Log
+import com.torrydo.weathervisualizer.common.error.DefaultError
 import com.torrydo.weathervisualizer.common.model.Resource
 import com.torrydo.weathervisualizer.utils.Logger
 import com.torrydo.weathervisualizer.utils.addLoggerPrefix
@@ -99,7 +100,7 @@ inline fun <T : Any, R : Any?> T.logIfErrorWith(
     } catch (e: Exception) {
         Log.e(tag.addLoggerPrefix(), e.message.toString())
 
-        Resource.Error(e)
+        Resource.Error(DefaultError(e.stackTraceToString()))
     }
 }
 

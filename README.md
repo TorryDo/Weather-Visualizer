@@ -1,1 +1,1 @@
-# WeatherVisulizer_MVI
+# WeatherVisualizer_MVI
