@@ -26,7 +26,6 @@ fun WithNext7DaysComposeVar(content: @Composable Next7DaysComposeVar.() -> Unit)
 class Next7DaysComposeVar : BaseComposeVar<WeatherInfo, Next7DaysViewModel>() {
 
 
-
     @Composable
     override fun SetupCompose() {
         context = LocalContext.current
@@ -36,9 +35,6 @@ class Next7DaysComposeVar : BaseComposeVar<WeatherInfo, Next7DaysViewModel>() {
         _viewModel = getViewModel()
         _state = _viewModel.collectAsState()
 
-        LaunchedEffect(Unit){
-            viewModel.updateWeatherInfo()
-        }
 
     }
 

@@ -23,6 +23,7 @@ fun WithWeatherTodayUiState(content: @Composable WeatherTodayComposeVar.() -> Un
 
 class WeatherTodayComposeVar : BaseComposeVar<WeatherTodayState, WeatherTodayViewModel>() {
 
+
     @Composable
     override fun SetupCompose() {
         context = LocalContext.current
@@ -31,10 +32,6 @@ class WeatherTodayComposeVar : BaseComposeVar<WeatherTodayState, WeatherTodayVie
         _viewModel = getViewModel()
         _state = viewModel.collectAsState()
 
-
-        LaunchedEffect(Unit) {
-            viewModel.updateLocation()
-        }
     }
 
 }

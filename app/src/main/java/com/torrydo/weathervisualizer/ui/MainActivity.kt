@@ -18,19 +18,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.torrydo.compose_easier.navigation.Nav
 import com.torrydo.compose_easier.navigation.NavItem
+import com.torrydo.weathervisualizer.domain.holder.WeatherInfoStateHolder
 import com.torrydo.weathervisualizer.ui.screen.home_screen.HomeScreen
 import com.torrydo.weathervisualizer.ui.screen.next7days.Next7DaysScreen
 import com.torrydo.weathervisualizer.ui.theme.WeatherVisualizerTheme
+import org.koin.androidx.compose.get
 
 class MainActivity : ComponentActivity() {
+
+    override fun onStart() {
+        super.onStart()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -60,9 +65,13 @@ fun MainNav() {
 
     val nav = remember { Nav(navController, mainScreens) }
 
+    val holder: WeatherInfoStateHolder = get()
+
     LaunchedEffect(Unit) {
         if (permission.status.isGranted.not()) {
             permission.launchPermissionRequest()
+        }else{
+            holder()
         }
     }
 

@@ -78,10 +78,12 @@ dependencies {
     android_libs()
     kotlin_libs()
     compose_libs()
-    orbit_mvi()
     accompanist()
     coroutines()
     data_store()
+
+    google_maps_api()
+    orbit_mvi()
     koin()
     ktor()
     coil()
@@ -91,7 +93,7 @@ dependencies {
 
 }
 
-private void android_libs(){
+private void android_libs() {
     dependencies.implementation 'com.google.android.gms:play-services-location:21.0.0'
 }
 
@@ -100,14 +102,21 @@ private void kotlin_libs() {
     dependencies.implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$serialization_version"
 }
 
-private void compose_libs(){
+private void compose_libs() {
     dependencies.implementation("androidx.compose.material:material-icons-extended:$compose_version")
 }
 
-private void accompanist(){
+private void accompanist() {
     def accompanist_version = "0.27.0"
     dependencies.implementation("com.google.accompanist:accompanist-permissions:$accompanist_version")
     dependencies.implementation("com.google.accompanist:accompanist-navigation-animation:$accompanist_version")
+}
+
+private void google_maps_api() {
+    // KTX for the Maps SDK for Android
+    dependencies.implementation 'com.google.maps.android:maps-ktx:3.2.1'
+    // (Optional) KTX for the Maps SDK for Android Utility Library
+    dependencies.implementation 'com.google.maps.android:maps-utils-ktx:3.2.1'
 }
 
 private void orbit_mvi() {
@@ -138,7 +147,7 @@ private void koin() {
     dependencies.implementation("io.insert-koin:koin-androidx-compose:$koin_version")
 }
 
-private void ktor(){
+private void ktor() {
     def ktor_version = "2.1.2"
     dependencies.implementation("io.ktor:ktor-client-core:$ktor_version")
     dependencies.implementation("io.ktor:ktor-client-cio:$ktor_version")
@@ -149,6 +158,6 @@ private void coil() {
     dependencies.implementation("io.coil-kt:coil-compose:$coil_version")
 }
 
-private void my_libs(){
+private void my_libs() {
     dependencies.implementation("io.github.torrydo:compose-easier:0.0.2")
 }

@@ -9,6 +9,7 @@ import android.location.LocationManager
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.torrydo.weathervisualizer.domain.location.LocationTracker
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
@@ -58,4 +59,5 @@ class DefaultLocationTrackerImpl(
             }
         }
     }
+
 }
