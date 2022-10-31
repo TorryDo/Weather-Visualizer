@@ -11,17 +11,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
@@ -29,9 +24,10 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.torrydo.weathervisualizer.ui.screen.city_search.CitySearchScreen
+import com.torrydo.compose_easier.navigation.Nav
+import com.torrydo.compose_easier.navigation.NavItem
+import com.torrydo.weathervisualizer.ui.screen.home_screen.HomeScreen
 import com.torrydo.weathervisualizer.ui.screen.next7days.Next7DaysScreen
-import com.torrydo.weathervisualizer.ui.screen.weather_today.WeatherTodayScreen
 import com.torrydo.weathervisualizer.ui.theme.WeatherVisualizerTheme
 
 class MainActivity : ComponentActivity() {
@@ -45,20 +41,24 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-sealed class Route(val name: String, val icon: ImageVector) {
-    object WeatherToday : Route("weather_today", Icons.Default.Home)
-    object CitySearch : Route("city_search", Icons.Default.Search)
-    object Next7Days : Route("next7days", Icons.Default.Menu)
+sealed class MainRoute(route: String, title: String): NavItem(route, title) {
+    object HomeScreen : MainRoute("homeScreen", "Home screen")
+    object Next7Days : MainRoute("next7days", "Next 7 Days")
 }
+
+private val mainScreens = listOf(
+    MainRoute.HomeScreen,
+    MainRoute.Next7Days
+)
 
 @Composable
 fun MainNav() {
 
-    val context = LocalContext.current
-
     val permission = rememberPermissionState(permission = Manifest.permission.ACCESS_FINE_LOCATION)
 
     val navController = rememberAnimatedNavController()
+
+    val nav = remember { Nav(navController, mainScreens) }
 
     LaunchedEffect(Unit) {
         if (permission.status.isGranted.not()) {
@@ -68,19 +68,11 @@ fun MainNav() {
 
     if (permission.status.isGranted) {
 
-        AnimatedNavHost(navController = navController, startDestination = Route.WeatherToday.name) {
-            composable(
-                route = Route.WeatherToday.name,
-                content = { WeatherTodayScreen() }
-            )
-            composable(
-                route = Route.CitySearch.name,
-                content = { CitySearchScreen() }
-            )
-            composable(
-                route = Route.Next7Days.name,
-                content = { Next7DaysScreen() }
-            )
+        nav.SetupNavGraph { route, _, data ->
+            when (route) {
+                MainRoute.HomeScreen.route -> HomeScreen(navController)
+                MainRoute.Next7Days.route -> Next7DaysScreen()
+            }
         }
     } else {
         LocationNotGrantedComponent()

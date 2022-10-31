@@ -87,6 +87,8 @@ dependencies {
     coil()
     lottieFiles()
 
+    my_libs()
+
 }
 
 private void android_libs(){
@@ -145,4 +147,8 @@ private void ktor(){
 private void coil() {
     def coil_version = "2.2.2"
     dependencies.implementation("io.coil-kt:coil-compose:$coil_version")
+}
+
+private void my_libs(){
+    dependencies.implementation("io.github.torrydo:compose-easier:0.0.2")
 }

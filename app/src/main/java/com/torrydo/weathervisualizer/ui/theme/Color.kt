@@ -9,5 +9,10 @@ val Teal200 = Color(0xFF03DAC5)
 
 object MyColor
 
-val MyColor.BLUE_LIGHT get() = Color(0xFFc6e1fc)
+val MyColor.LIGHT_BLUE get() = Color(0xFFc6e1fc)
 val MyColor.BLUE_LIGHTER get() = Color(0xFFd5ecfe)
+val MyColor.DARK_BLUE get() = Color(0xFF255fa2)
+
+val MyColor.GRAY get() = Color.Gray
+val MyColor.LIGHT_GRAY get() = Color.LightGray
+val MyColor.DARK_GRAY get() = Color.DarkGray

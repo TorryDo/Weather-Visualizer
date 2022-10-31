@@ -14,8 +14,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.torrydo.compose_easier.ext.noRippleClickable
 import com.torrydo.weathervisualizer.R
-import com.torrydo.weathervisualizer.utils.compose.noRippleClickable
 
 
 @Composable
@@ -48,38 +48,13 @@ object IconProvider {
         )
     }
 
-//    @Composable
-//    fun Color.UpArrow(modifier: Modifier = Modifier) {
-//        Image(
-//            modifier = modifier,
-//            imageVector = ImageVector.vectorResource(id = R.drawable.ic_color_up_arrow),
-//            contentDescription = "Color.UpArrow"
-//        )
-//    }
-
-}
-
-@Composable
-inline fun ClickableIcon(
-    modifier: Modifier = Modifier,
-    crossinline icon: @Composable () -> Unit,
-    crossinline onClick: () -> Unit = {}
-) {
-    IconButton(modifier = modifier, onClick = { onClick() }) {
-        icon()
+    @Composable
+    fun LeftArrow(modifier: Modifier = Modifier, iconProps: IconProps = defaultIconProps) {
+        Image(
+            modifier = modifier,
+            imageVector = ImageVector.vectorResource(id = R.drawable.ic_left_arrow),
+            contentDescription = "Color.UpArrow"
+        )
     }
-}
 
-@Composable
-fun StaticIcon(
-    modifier: Modifier = Modifier.size(20.dp),
-    icon: @Composable () -> Unit,
-    onClick: () -> Unit = {}
-) {
-    Box(
-        modifier = modifier.noRippleClickable { onClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        icon()
-    }
 }

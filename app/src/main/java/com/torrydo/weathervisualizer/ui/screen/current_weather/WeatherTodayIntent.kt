@@ -1,4 +1,4 @@
-package com.torrydo.weathervisualizer.ui.screen.weather_today
+package com.torrydo.weathervisualizer.ui.screen.current_weather
 
 import com.torrydo.weathervisualizer.domain.weather.WeatherData
 import com.torrydo.weathervisualizer.domain.weather.WeatherType
