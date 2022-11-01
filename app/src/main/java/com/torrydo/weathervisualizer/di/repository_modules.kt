@@ -7,4 +7,5 @@ import org.koin.dsl.module
 
 val repository_modules = module {
     single<WeatherRepository> { WeatherRepositoryImpl(OpenMeteoWeatherApi()) }
+
 }

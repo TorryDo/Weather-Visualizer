@@ -15,13 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.torrydo.compose_easier.navigation.BottomNavBar
 import com.torrydo.compose_easier.navigation.BottomNavItem
-import com.torrydo.weathervisualizer.ui.screen.city_search.CitySearchScreen
+import com.torrydo.weathervisualizer.ui.screen.weather_map.WeatherMapScreen
 import com.torrydo.weathervisualizer.ui.screen.current_weather.CurrentWeatherScreen
 import com.torrydo.weathervisualizer.ui.theme.LIGHT_BLUE
 import com.torrydo.weathervisualizer.ui.theme.MyColor
@@ -72,7 +71,7 @@ fun HomeScreen(mainNavController: NavController ) {
                     ) {
                         when (navItem.route) {
                             HomeRoute.CurrentWeather.route -> CurrentWeatherScreen(mainNavController)
-                            HomeRoute.CitySearch.route -> CitySearchScreen()
+                            HomeRoute.CitySearch.route -> WeatherMapScreen()
                         }
                     }
                 }

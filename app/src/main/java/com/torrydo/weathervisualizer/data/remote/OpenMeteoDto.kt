@@ -8,6 +8,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class OpenMeteoDto(
+
+    @SerialName("latitude")
+    val lat: Double,
+
+    @SerialName("longitude")
+    val lng: Double,
+
     @SerialName("hourly_units")
     val units: OpenMeteoUnitsDto,
 

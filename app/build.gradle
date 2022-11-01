@@ -1,9 +1,11 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
-
+    
     id 'kotlin-kapt'
     id 'org.jetbrains.kotlin.plugin.serialization' version "$kotlin_version"
+
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
 }
 
 android {
@@ -75,6 +77,11 @@ dependencies {
     testImplementation("com.google.truth:truth:$google_truth_version")
     androidTestImplementation("com.google.truth:truth:$google_truth_version")
 
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+
+    implementation "dev.shreyaspatil:capturable:1.0.3"
+
+
     android_libs()
     kotlin_libs()
     compose_libs()
@@ -113,10 +120,16 @@ private void accompanist() {
 }
 
 private void google_maps_api() {
-    // KTX for the Maps SDK for Android
-    dependencies.implementation 'com.google.maps.android:maps-ktx:3.2.1'
-    // (Optional) KTX for the Maps SDK for Android Utility Library
-    dependencies.implementation 'com.google.maps.android:maps-utils-ktx:3.2.1'
+    dependencies.implementation 'com.google.maps.android:maps-compose:2.7.2'
+    dependencies.implementation 'com.google.android.gms:play-services-maps:18.1.0'
+
+//    dependencies.implementation 'com.google.android.libraries.places:places:2.6.0'
+
+//    // KTX for the Maps SDK for Android library
+//    dependencies.implementation 'com.google.maps.android:maps-ktx:3.4.0'
+//
+//    // KTX for the Maps SDK for Android Utility Library
+//    dependencies.implementation 'com.google.maps.android:maps-utils-ktx:3.4.0'
 }
 
 private void orbit_mvi() {

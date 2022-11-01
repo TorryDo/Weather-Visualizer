@@ -14,7 +14,7 @@ private data class IndexedWeatherData(
 )
 
 fun OpenMeteoDto.toWeatherInfo(): WeatherInfo {
-    val weatherDataMap = this.hourly.toWeatherDataMap()
+    val weatherDataMap = this.toWeatherDataMap()
     val now = LocalDateTime.now()
     val currentWeatherData = weatherDataMap[0]?.find {
         val hour = if(now.minute < 30) now.hour else now.hour + 1
@@ -26,19 +26,21 @@ fun OpenMeteoDto.toWeatherInfo(): WeatherInfo {
     )
 }
 
-fun OpenMeteoHourlyDto.toWeatherDataMap(): Map<Int, List<WeatherData>> {
+fun OpenMeteoDto.toWeatherDataMap(): Map<Int, List<WeatherData>> {
 
-    return this.time.mapIndexed { index, time ->
+    return this.hourly.time.mapIndexed { index, time ->
         val localDateTime = LocalDateTime.parse(time, DateTimeFormatter.ISO_DATE_TIME)
-        val temperature = temperature_2m[index]
-        val humidity = relativehumidity_2m[index]
-        val windSpeed = windspeed_10m[index]
-        val weatherType = WeatherType.fromWMO(weatherCode[index])
-        val pressure = pressure_msl[index]
+        val temperature = hourly.temperature_2m[index]
+        val humidity = hourly.relativehumidity_2m[index]
+        val windSpeed = hourly.windspeed_10m[index]
+        val weatherType = WeatherType.fromWMO(hourly.weatherCode[index])
+        val pressure = hourly.pressure_msl[index]
 
         IndexedWeatherData(
             index = index,
             data = WeatherData(
+                lat = lat,
+                lng = lng,
                 time = localDateTime,
                 temperature = temperature,
                 humidity = humidity,
