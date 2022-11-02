@@ -1,6 +1,7 @@
 package com.torrydo.weathervisualizer.ui.screen.weather_map
 
-import androidx.compose.runtime.mutableStateListOf
+import android.graphics.Bitmap
+import androidx.compose.runtime.*
 import com.google.android.gms.maps.model.LatLng
 import com.torrydo.weathervisualizer.common.base.BaseViewModel
 import com.torrydo.weathervisualizer.common.model.onSuccess
@@ -9,52 +10,46 @@ import com.torrydo.weathervisualizer.domain.repository.WeatherRepository
 import com.torrydo.weathervisualizer.domain.weather.WeatherData
 import com.torrydo.weathervisualizer.domain.weather.WeatherInfo
 import com.torrydo.weathervisualizer.utils.Logger
-import com.torrydo.weathervisualizer.utils.lang.roundTo
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.withContext
-import org.koin.core.KoinApplication.Companion.init
-import org.orbitmvi.orbit.Container
-import org.orbitmvi.orbit.ContainerHost
-import org.orbitmvi.orbit.syntax.simple.intent
-import org.orbitmvi.orbit.syntax.simple.postSideEffect
-import org.orbitmvi.orbit.syntax.simple.reduce
-import org.orbitmvi.orbit.viewmodel.container
 
-
+// IDK why orbit mvi doesn't working here, couldn't call reducer or postSideEffect. it looks like a bug
 class WeatherMapViewModel(
     private val weatherInfoStateHolder: WeatherInfoStateHolder,
     private val weatherRepository: WeatherRepository
+) : BaseViewModel() {
 
-) : BaseViewModel(), ContainerHost<WeatherMapState, WeatherMapSideEffect> {
-    override val container: Container<WeatherMapState, WeatherMapSideEffect>
-        get() = container(WeatherMapState())
+    val curLatLng = MutableStateFlow<LatLng?>(null)
 
-    val weatherDataList = mutableStateListOf<WeatherData>()
+    val markers = mutableStateMapOf<LatLng, Bitmap?>()
+
+//    val weathers = mutableStateListOf<WeatherData>()
+
+    val state = MutableStateFlow(WeatherMapState())
 
     init {
         ioScope {
             weatherInfoStateHolder.state.collectLatest {
-                if (it.currentWeather == null) return@collectLatest
-                mainScope{
-                    weatherDataList.add(it.currentWeather)
-                }
+                val cur = it.currentWeather ?: return@collectLatest
+                curLatLng.value = LatLng(cur.lat, cur.lng)
+
+                state.value = state.value.copy(
+                    weathers = state.value.weathers.plus(cur)
+                )
             }
         }
     }
 
-    fun onMapCLick(latLng: LatLng) {
-
-        Logger.d(latLng.toString())
-
-        suspend fun onSuccess(weatherInfo: WeatherInfo) {
+    fun onMapCLick(latLng: LatLng, onSuccess: (WeatherData) -> Unit) {
+        //        Logger.d("vm before api = ${latLng}")
+        fun onSuccess(weatherInfo: WeatherInfo) {
             val cur = weatherInfo.currentWeather ?: return
-            mainScope {
-                weatherDataList.add(cur)
-            }
-            intent {
-                postSideEffect(WeatherMapSideEffect.OnMapClick)
-            }
+//            Logger.d("vm after api = ${cur.getLatLng()}")
+//            weathers.add(cur)
+            state.value = state.value.copy(
+                weathers = state.value.weathers.plus(cur)
+            )
+            onSuccess(weatherInfo.currentWeather)
         }
 
         ioScope {
@@ -63,6 +58,28 @@ class WeatherMapViewModel(
                 long = latLng.longitude
             ).onSuccess { it?.let { onSuccess(it) } }
         }
+
+
     }
+
+    fun removeWeatherData(latLng: LatLng) {
+        val pos = state.value.weathers.indexOfFirst { it.getLatLng() == latLng }
+        if (pos >= 0) {
+
+            markers.remove(latLng)
+
+            state.value.weathers.let {
+                state.value = state.value.copy(
+                    weathers = it.minus(it[pos])
+                )
+            }
+
+
+            Logger.d("remove at: ${latLng}")
+
+        }
+
+    }
+
 
 }

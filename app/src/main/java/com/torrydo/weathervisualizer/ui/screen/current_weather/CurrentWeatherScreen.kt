@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.torrydo.compose_easier.ext.LaunchedEffectWith
 import com.torrydo.compose_easier.ext.noRippleClickable
 import com.torrydo.compose_easier.navigation.ext.to
 import com.torrydo.compose_easier.view.IconEz
@@ -31,6 +32,7 @@ import com.torrydo.weathervisualizer.ui.theme.BLUE_LIGHTER
 import com.torrydo.weathervisualizer.ui.theme.DARK_BLUE
 import com.torrydo.weathervisualizer.ui.theme.LIGHT_BLUE
 import com.torrydo.weathervisualizer.ui.theme.MyColor
+import com.torrydo.weathervisualizer.utils.Logger
 import com.torrydo.weathervisualizer.utils.andr.showShortToast
 import org.orbitmvi.orbit.compose.collectSideEffect
 
@@ -39,6 +41,7 @@ import org.orbitmvi.orbit.compose.collectSideEffect
 fun CurrentWeatherScreen(mainNavController: NavController) = WithWeatherTodayUiState {
 
     viewModel.collectSideEffect {
+//        Logger.d("type0 = ${it::class.simpleName}")
         when (it) {
             is WeatherTodaySideEffect.Toast -> {
                 context.showShortToast("hello")

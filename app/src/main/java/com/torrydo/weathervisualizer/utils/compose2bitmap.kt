@@ -25,11 +25,13 @@ fun CaptureBitmap(
      * Callback function which could get latest image bitmap
      **/
     fun captureBitmap(): Bitmap? {
-//        if(composeView.isAttachedToWindow.not())return null
-        return composeView.drawToBitmap()
+        return try {
+            composeView.drawToBitmap()
+        } catch (e: Exception) {
+            null
+        }
     }
 
-    if(composeView.isAttachedToWindow.not()) return {null}
     /** Use Native View inside Composable **/
     AndroidView(
         factory = {
