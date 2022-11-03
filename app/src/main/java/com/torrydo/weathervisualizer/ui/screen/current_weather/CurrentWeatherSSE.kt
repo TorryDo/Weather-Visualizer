@@ -4,7 +4,7 @@ import com.torrydo.weathervisualizer.domain.weather.WeatherData
 import com.torrydo.weathervisualizer.domain.weather.WeatherType
 
 
-data class WeatherTodayState(
+data class CurrentWeatherState(
 
     val time: Double = 0.0,
     val temperature: Double = 0.0,
@@ -18,10 +18,10 @@ data class WeatherTodayState(
     val locationName: String = "None"
 )
 
-sealed interface WeatherTodaySideEffect {
+sealed interface CurrentWeatherSideEffect {
 
-    data class Toast(val message: String) : WeatherTodaySideEffect
+    data class Toast(val message: String) : CurrentWeatherSideEffect
 
-    object NavigateToNext7DaysScreen: WeatherTodaySideEffect
+    object NavigateToNext7DaysScreen: CurrentWeatherSideEffect
 
 }

@@ -2,13 +2,11 @@ package com.torrydo.weathervisualizer.ui.screen.next7days
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import com.torrydo.weathervisualizer.common.base.BaseComposeVar
 import com.torrydo.weathervisualizer.domain.weather.WeatherInfo
-import com.torrydo.weathervisualizer.ui.screen.current_weather.WeatherTodayState
 import org.koin.androidx.compose.getViewModel
 import org.orbitmvi.orbit.compose.collectAsState
 
@@ -23,7 +21,7 @@ fun WithNext7DaysComposeVar(content: @Composable Next7DaysComposeVar.() -> Unit)
 
 }
 
-class Next7DaysComposeVar : BaseComposeVar<WeatherInfo, Next7DaysViewModel>() {
+class Next7DaysComposeVar : BaseComposeVar<WeatherInfo, Next7DayViewModel>() {
 
 
     @Composable

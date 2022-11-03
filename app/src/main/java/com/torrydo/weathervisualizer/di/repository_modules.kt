@@ -3,6 +3,7 @@ package com.torrydo.weathervisualizer.di
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.torrydo.weathervisualizer.MarkerDatabase
 import com.torrydo.weathervisualizer.data.remote.OpenMeteoWeatherApi
+import com.torrydo.weathervisualizer.data.repository.MapRepositoryImpl
 import com.torrydo.weathervisualizer.data.repository.MarkerRepositoryImpl
 import com.torrydo.weathervisualizer.data.repository.WeatherRepositoryImpl
 import com.torrydo.weathervisualizer.domain.repository.WeatherRepository
@@ -22,6 +23,10 @@ val repository_modules = module {
         MarkerRepositoryImpl(
             db = get<MarkerDatabase>()
         )
+    }
+
+    single<MapRepositoryImpl> {
+        MapRepositoryImpl(androidContext())
     }
 
 }

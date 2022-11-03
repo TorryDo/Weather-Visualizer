@@ -30,9 +30,12 @@ import com.torrydo.weathervisualizer.domain.weather.WeatherData
 import com.torrydo.weathervisualizer.ui.assets.fromDrawable
 import com.torrydo.weathervisualizer.utils.CaptureBitmap
 import com.torrydo.weathervisualizer.utils.GoogleMapStyle
-import com.torrydo.weathervisualizer.utils.Logger
+import com.torrydo.weathervisualizer.utils.andr.showLongToast
+import com.torrydo.weathervisualizer.utils.andr.showShortToast
 import com.torrydo.weathervisualizer.utils.lang.compose.coloredShadow
 import org.koin.androidx.compose.getViewModel
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun WeatherMapScreen() = WithLazyComposeVar {
@@ -42,15 +45,29 @@ fun WeatherMapScreen() = WithLazyComposeVar {
 
     val vm: WeatherMapViewModel = getViewModel()
 
+    val state = vm.collectAsState()
+
+    vm.collectSideEffect{
+        when(it){
+            is WeatherMapSideEffect.OnMapClick -> {
+
+            }
+            is WeatherMapSideEffect.AlertCanNotRemoveCurrentMarker -> {
+                context.showLongToast("you can't remove this marker bcause it's your current location")
+            }
+            is WeatherMapSideEffect.Toast -> {
+                context.showShortToast(it.message)
+            }
+        }
+    }
+
     // UI ------------------------------------------------------------------------------------------
 
-    vm.state.collectAsState().value.weathers.apply {
-        // TODO: if bitmap key not exist inside weathers, remove
-        Logger.d("importing bitmap: ${this.map { it.getLatLng() }}")
+    state.value.weathers.apply {
         this.forEach {
             val ll = it.getLatLng()
-            if(vm.markerAndBmMap[ll] == null){
-                vm.markerAndBmMap[ll] = getBitmapByWeather(it).invoke()
+            if (vm.markerAndBmMap[ll] == null) {
+                vm.markerAndBmMap[ll] = vm.getBitmapByWeather(it).invoke()
             }
         }
     }
@@ -60,8 +77,8 @@ fun WeatherMapScreen() = WithLazyComposeVar {
             .fillMaxSize()
             .background(Color.DarkGray)
     ) {
-        vm.state.collectAsState().value.weathers.let { weathers ->
-//            Logger.d("weathers: ${weathers.map { it.getLatLng() }}")
+        state.value.weathers.let { weathers ->
+
             if (weathers.isNotEmpty()) {
                 val cameraPositionState = rememberCameraPositionState {
                     position = CameraPosition.fromLatLngZoom(
@@ -76,10 +93,10 @@ fun WeatherMapScreen() = WithLazyComposeVar {
                         .clip(MaterialTheme.shapes.small),
                     cameraPositionState = cameraPositionState,
                     properties = MapProperties(mapStyleOptions = MapStyleOptions(GoogleMapStyle.SIMPLE)),
-                    onMapClick = vm::onMapCLick
+                    onMapClick = vm::addMarker
                 ) {
 
-                    for (ll in vm.state.collectAsState().value.weathers.map { it.getLatLng() }) {
+                    for (ll in state.value.weathers.map { it.getLatLng() }) {
                         MarkerInfoWindow(
                             state = MarkerState(ll),
                             icon = vm.markerAndBmMap[ll]?.let {
@@ -101,7 +118,7 @@ fun WeatherMapScreen() = WithLazyComposeVar {
 }
 
 @Composable
-private fun getBitmapByWeather(cur: WeatherData?): () -> Bitmap? {
+private fun WeatherMapViewModel.getBitmapByWeather(cur: WeatherData?): () -> Bitmap? {
 
     if (cur == null) return { null }
 
@@ -112,7 +129,7 @@ private fun getBitmapByWeather(cur: WeatherData?): () -> Bitmap? {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceEvenly,
             ) {
-                Text(text = "Gotham", fontWeight = FontWeight.Bold, color = Color.Gray)
+                Text(text = cur.weatherType.weatherDesc, fontWeight = FontWeight.Bold, color = Color.Gray)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconEz.Static(
                         icon = {
@@ -132,6 +149,7 @@ private fun getBitmapByWeather(cur: WeatherData?): () -> Bitmap? {
                 }
             }
         }
+
     }
 }
 

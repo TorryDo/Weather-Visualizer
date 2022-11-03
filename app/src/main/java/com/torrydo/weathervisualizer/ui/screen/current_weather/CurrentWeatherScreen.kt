@@ -22,31 +22,39 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.torrydo.compose_easier.ext.LaunchedEffectWith
 import com.torrydo.compose_easier.ext.noRippleClickable
 import com.torrydo.compose_easier.navigation.ext.to
 import com.torrydo.compose_easier.view.IconEz
+import com.torrydo.weathervisualizer.common.base.WithLazyComposeVar
 import com.torrydo.weathervisualizer.ui.MainRoute
 import com.torrydo.weathervisualizer.ui.assets.IconProvider
 import com.torrydo.weathervisualizer.ui.theme.BLUE_LIGHTER
 import com.torrydo.weathervisualizer.ui.theme.DARK_BLUE
 import com.torrydo.weathervisualizer.ui.theme.LIGHT_BLUE
 import com.torrydo.weathervisualizer.ui.theme.MyColor
-import com.torrydo.weathervisualizer.utils.Logger
 import com.torrydo.weathervisualizer.utils.andr.showShortToast
+import org.koin.androidx.compose.getViewModel
+import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
 
 @Composable
-fun CurrentWeatherScreen(mainNavController: NavController) = WithWeatherTodayUiState {
+fun CurrentWeatherScreen(mainNavController: NavController) = WithLazyComposeVar {
+
+    context = initVar()
+    scope = initVar()
+
+    val viewModel: CurrentWeatherViewModel = getViewModel()
+
+    val state = viewModel.collectAsState()
 
     viewModel.collectSideEffect {
-//        Logger.d("type0 = ${it::class.simpleName}")
+
         when (it) {
-            is WeatherTodaySideEffect.Toast -> {
+            is CurrentWeatherSideEffect.Toast -> {
                 context.showShortToast("hello")
             }
-            is WeatherTodaySideEffect.NavigateToNext7DaysScreen -> {
+            is CurrentWeatherSideEffect.NavigateToNext7DaysScreen -> {
                 mainNavController.to(scope, MainRoute.Next7Days.route, data = state)
             }
         }
@@ -59,7 +67,7 @@ fun CurrentWeatherScreen(mainNavController: NavController) = WithWeatherTodayUiS
             .fillMaxSize()
             .background(Color.LightGray),
     ) {
-        CardComponent(
+        viewModel.CardComponent(
             modifier = Modifier
                 .padding(10.dp)
                 .fillMaxWidth()
@@ -91,7 +99,7 @@ fun CurrentWeatherScreen(mainNavController: NavController) = WithWeatherTodayUiS
             }
             Spacer(modifier = Modifier.height(10.dp))
 
-            WeatherPerHourComponent(
+            viewModel.WeatherPerHourComponent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 20.dp, bottom = 40.dp)
@@ -104,10 +112,12 @@ fun CurrentWeatherScreen(mainNavController: NavController) = WithWeatherTodayUiS
 }
 
 @Composable
-private fun WeatherTodayComposeVar.CardComponent(
+private fun CurrentWeatherViewModel.CardComponent(
     modifier: Modifier = Modifier,
     color: Color = MyColor.DARK_BLUE
 ) {
+
+    val state = collectAsState().value
 
     Card(
         modifier = modifier,
@@ -142,9 +152,10 @@ private fun WeatherTodayComposeVar.CardComponent(
             Spacer(modifier = Modifier.height(10.dp))
 
 //            Middle
-            Column(modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -153,12 +164,13 @@ private fun WeatherTodayComposeVar.CardComponent(
                     fontSize = 60.sp,
                     textAlign = TextAlign.Justify,
                     color = color,
-                    modifier = Modifier.weight(1f).wrapContentHeight()
+                    modifier = Modifier
+                        .weight(1f)
+                        .wrapContentHeight()
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(text = state.weatherType?.weatherDesc ?: "", fontSize = 20.sp, color = color)
 
-//                Spacer(modifier = Modifier.weight(1f))
 
                 Row(
                     modifier = Modifier
@@ -175,31 +187,75 @@ private fun WeatherTodayComposeVar.CardComponent(
                 }
             }
 
-            Column(
+            TemperatureCardComponent(
                 modifier = Modifier
                     .padding(20.dp)
                     .fillMaxWidth()
-                    .heightIn(min = 200.dp, max = 300.dp)
+                    .heightIn(min = 150.dp, max = 200.dp)
                     .clip(RoundedCornerShape(5))
                     .background(MyColor.BLUE_LIGHTER)
 
-            ) {
-
-            }
+            )
 
 
         }
     }
 }
 
+
 @Composable
-private fun WeatherTodayComposeVar.WeatherPerHourComponent(
+private fun CurrentWeatherViewModel.TemperatureCardComponent(
+    modifier: Modifier = Modifier,
+    color: Color = MyColor.DARK_BLUE
+) {
+
+    val state = collectAsState()
+
+    val timeDecs = listOf("Morning", "Afternoon", "Evening", "Night")
+
+    Column(modifier = modifier.padding(vertical = 10.dp, horizontal = 15.dp)) {
+        Text(text = "Temperature", fontWeight = FontWeight.Bold, color = color, fontSize = 16.sp)
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+
+            if (state.value.weatherPerHour.isNotEmpty()) {
+                timeDecs.forEachIndexed { index, s ->
+                    val pos = (index + 1) * 6 - 1
+                    Column(
+                        modifier = Modifier.height(70.dp),
+                        verticalArrangement = Arrangement.SpaceBetween,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(text = s, color = color)
+                        Text(
+                            text = "${state.value.weatherPerHour[pos].temperature}°C",
+                            fontWeight = FontWeight.Bold,
+                            color = color
+                        )
+                    }
+                }
+            }
+
+        }
+    }
+}
+
+@Composable
+private fun CurrentWeatherViewModel.WeatherPerHourComponent(
     modifier: Modifier = Modifier
 ) {
+
+    val state = collectAsState()
+
     LazyRow(
         modifier = modifier
     ) {
-        items(state.weatherPerHour) { item ->
+        items(state.value.weatherPerHour) { item ->
             Column(
                 modifier = Modifier
                     .width(70.dp)
@@ -208,15 +264,17 @@ private fun WeatherTodayComposeVar.WeatherPerHourComponent(
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = "${item.time.hour}h", color = Color.Gray, fontWeight = FontWeight.Bold)
-                IconEz.Static(icon = {
-                    Image(
-                        modifier = Modifier.size(40.dp),
-                        imageVector = ImageVector.vectorResource(id = item.weatherType.iconRes),
-                        contentDescription = "weather type icon",
-                    )
-                }, modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth())
+                IconEz.Static(
+                    icon = {
+                        Image(
+                            modifier = Modifier.size(40.dp),
+                            imageVector = ImageVector.vectorResource(id = item.weatherType.iconRes),
+                            contentDescription = "weather type icon",
+                        )
+                    }, modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                )
                 Text(text = "${item.temperature}℃", fontWeight = FontWeight.Bold)
             }
         }

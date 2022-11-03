@@ -16,19 +16,27 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.torrydo.compose_easier.view.IconEz
+import com.torrydo.weathervisualizer.common.base.WithLazyComposeVar
 import com.torrydo.weathervisualizer.domain.weather.WeatherData
 import com.torrydo.weathervisualizer.domain.weather.WeatherInfo
 import com.torrydo.weathervisualizer.ui.assets.IconProvider
 import com.torrydo.weathervisualizer.ui.assets.fromDrawable
+import org.koin.androidx.compose.getViewModel
+import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun Next7DaysScreen(
-) = WithNext7DaysComposeVar {
+) = WithLazyComposeVar {
+
+    onBackPressedDispatcher = initVar()
+
+    val viewModel: Next7DayViewModel = getViewModel()
+
 
     viewModel.collectSideEffect {
         when (it) {
-            is Next7DaySideEffect.NavigateBack -> onBackPressedDispatcher?.onBackPressed()
+            is Next7DaySideEffect.NavigateBack -> onBackPressedDispatcher.onBackPressed()
         }
     }
 
@@ -39,7 +47,7 @@ fun Next7DaysScreen(
             .fillMaxSize()
             .background(Color.LightGray)
     ) {
-        TopBarComponent(
+        viewModel.TopBarComponent(
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -50,14 +58,14 @@ fun Next7DaysScreen(
         ) {
             Text(text = "Today", modifier = Modifier.fillMaxWidth())
 
-            WeatherPerHourComponent(
+            viewModel.WeatherPerHourComponent(
                 modifier = Modifier
                     .fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            FollowingDaysComponents(
+            viewModel.FollowingDaysComponents(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
@@ -76,9 +84,12 @@ private fun WeatherInfo.getWeatherSummaryFollowingDays(): List<WeatherData> {
 }
 
 @Composable
-private fun Next7DaysComposeVar.FollowingDaysComponents(
+private fun Next7DayViewModel.FollowingDaysComponents(
     modifier: Modifier = Modifier
 ) {
+
+    val state = collectAsState().value
+
     LazyColumn(modifier = modifier) {
         items(state.getWeatherSummaryFollowingDays()) { weatherData ->
 
@@ -92,7 +103,9 @@ private fun Next7DaysComposeVar.FollowingDaysComponents(
 @Composable
 private fun WeatherItem(modifier: Modifier = Modifier, weatherData: WeatherData) {
     Row(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 10.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.fillMaxHeight()) {
@@ -116,9 +129,11 @@ private fun WeatherItem(modifier: Modifier = Modifier, weatherData: WeatherData)
 }
 
 @Composable
-private fun Next7DaysComposeVar.WeatherPerHourComponent(
+private fun Next7DayViewModel.WeatherPerHourComponent(
     modifier: Modifier = Modifier
 ) {
+
+    val state = collectAsState().value
 
     LazyRow(
         modifier = modifier
@@ -150,7 +165,7 @@ private fun Next7DaysComposeVar.WeatherPerHourComponent(
 }
 
 @Composable
-private fun Next7DaysComposeVar.TopBarComponent(
+private fun Next7DayViewModel.TopBarComponent(
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -159,7 +174,7 @@ private fun Next7DaysComposeVar.TopBarComponent(
     ) {
         IconEz.Clickable(
             icon = { IconProvider.LeftArrow() },
-            onClick = { viewModel.navigateBack() })
+            onClick = { navigateBack() })
 
     }
 }
