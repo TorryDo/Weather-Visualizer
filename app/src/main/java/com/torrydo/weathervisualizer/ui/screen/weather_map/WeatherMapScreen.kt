@@ -22,12 +22,12 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.*
 import com.torrydo.compose_easier.ext.LaunchedEffectWith
 import com.torrydo.compose_easier.view.IconEz
 import com.torrydo.weathervisualizer.common.base.WithLazyComposeVar
+import com.torrydo.weathervisualizer.domain.weather.WeatherData
 import com.torrydo.weathervisualizer.ui.assets.fromDrawable
 import com.torrydo.weathervisualizer.utils.CaptureBitmap
 import com.torrydo.weathervisualizer.utils.GoogleMapStyle
@@ -56,18 +56,19 @@ fun WeatherMapScreen() = WithLazyComposeVar {
             .background(Color.DarkGray)
     ) {
 
-        if (vm.curLatLng.collectAsState().value != null) {
+        if (vm.curWeather.collectAsState().value != null) {
             val cameraPositionState = rememberCameraPositionState {
                 position = CameraPosition.fromLatLngZoom(
-                    vm.curLatLng.value!!, 10f
+                    vm.curWeather.value!!.getLatLng(), 10f
                 )
             }
 
-            var tempLatLng: LatLng? by remember { mutableStateOf(vm.curLatLng.value) }
-            val captureBitmap = vm.getBitmapByLatLng(latlng = tempLatLng)
+//            var tempLatLng: LatLng? by remember { mutableStateOf(vm.curLatLng.value) }
+            var tempWeather by remember { mutableStateOf(vm.curWeather.value) }
+            val captureBitmap = vm.getBitmapByLatLng(cur = tempWeather)
 
             LaunchedEffect(Unit) {
-                vm.markers[tempLatLng!!] = captureBitmap.invoke()
+                vm.markers[vm.curWeather.value!!.getLatLng()] = captureBitmap.invoke()
             }
 
 
@@ -79,51 +80,48 @@ fun WeatherMapScreen() = WithLazyComposeVar {
                 cameraPositionState = cameraPositionState,
                 properties = MapProperties(mapStyleOptions = MapStyleOptions(GoogleMapStyle.SIMPLE)),
                 onMapClick = {
-                    if (it != vm.curLatLng.value) {
-                        vm.onMapCLick(it){
-                            tempLatLng = it.getLatLng()
-                            vm.markers[it.getLatLng()] = captureBitmap.invoke()
+
+                    vm.onMapCLick(it) { weather ->
+                        if (vm.state.value.weathers.contains(weather).not()) {
+                            weather.getLatLng().let { ll ->
+//                            tempLatLng = ll
+                                tempWeather = weather
+                                vm.markers[ll] = captureBitmap.invoke()
+                            }
                         }
                     }
+
                 },
             ) {
-                vm.markers.forEach { (latlng, bitmap) ->
 
-                    val markerState = rememberMarkerState(null, latlng)
+                for (ll in vm.state.collectAsState().value.weathers.map { it.getLatLng() }) {
 
                     MarkerInfoWindow(
-                        state = markerState,
-                        icon = bitmap?.let {
+                        state = MarkerState(ll),
+                        icon = vm.markers[ll]?.let {
                             BitmapDescriptorFactory.fromBitmap(
                                 it
                             )
                         },
                         onClick = {
 
-                            vm.removeWeatherData(latlng)
+                            vm.removeWeatherData(ll)
 
-                            true
+                            false
                         }
                     )
-
-                    LaunchedEffect(Unit) {
-                        tempLatLng = markerState.position
-                        vm.markers[markerState.position] = captureBitmap.invoke()
-                    }
 
                 }
             }
         }
 
-
     }
 }
 
 @Composable
-private fun WeatherMapViewModel.getBitmapByLatLng(latlng: LatLng?): () -> Bitmap? {
+private fun WeatherMapViewModel.getBitmapByLatLng(cur: WeatherData?): () -> Bitmap? {
 
-    val it = this.state.collectAsState().value.weathers.find { it.getLatLng() == latlng }
-        ?: return { null }
+    if (cur == null) return { null }
 
     return CaptureBitmap {
 
@@ -136,7 +134,7 @@ private fun WeatherMapViewModel.getBitmapByLatLng(latlng: LatLng?): () -> Bitmap
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconEz.Static(
                         icon = {
-                            it.weatherType.let {
+                            cur.weatherType.let {
                                 Image(
                                     imageVector = fromDrawable(id = it.iconRes),
                                     contentDescription = it.weatherDesc,
@@ -145,7 +143,7 @@ private fun WeatherMapViewModel.getBitmapByLatLng(latlng: LatLng?): () -> Bitmap
                         }
                     )
                     Text(
-                        text = " ${it.temperature}",
+                        text = " ${cur.temperature}",
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
