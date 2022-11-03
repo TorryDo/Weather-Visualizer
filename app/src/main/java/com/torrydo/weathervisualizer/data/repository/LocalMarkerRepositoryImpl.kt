@@ -3,16 +3,16 @@ package com.torrydo.weathervisualizer.data.repository
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.torrydo.weathervisualizer.MarkerDatabase
-import com.torrydo.weathervisualizer.domain.repository.MarkerRepository
+import com.torrydo.weathervisualizer.domain.repository.LocalMarkerRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import maps.markerdb.MarkerEntity
 
-class MarkerRepositoryImpl(
+class LocalMarkerRepositoryImpl(
     db: MarkerDatabase
-) : MarkerRepository {
+) : LocalMarkerRepository {
 
     private val queries = db.markerEntityQueries
 
@@ -36,22 +36,17 @@ class MarkerRepositoryImpl(
         return queries.getAllMarkers().asFlow().mapToList()
     }
 
-    override suspend fun insertMarker(lat: Double, lng: Double, id: Long?) {
-        return io {
-            queries.insertMarker(id, lat, lng)
-        }
+    override suspend fun insertMarker(lat: Double, lng: Double, id: Long?) = io {
+        queries.insertMarker(id, lat, lng)
     }
 
-    override suspend fun deleteMarkerByLatLng(lat: Double, lng: Double) {
-        io {
-            queries.deleteMarkerByLatLng(lat, lng)
-        }
+    override suspend fun deleteMarkerByLatLng(lat: Double, lng: Double) = io {
+        queries.deleteMarkerByLatLng(lat, lng)
     }
 
-    override suspend fun deleteMarkerById(id: Long) {
-        io {
-            queries.deleteMarkerById(id)
-        }
+
+    override suspend fun deleteMarkerById(id: Long) = io {
+        queries.deleteMarkerById(id)
     }
 
 

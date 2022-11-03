@@ -9,11 +9,10 @@ import com.torrydo.weathervisualizer.common.model.onError
 import com.torrydo.weathervisualizer.common.model.onSuccess
 import com.torrydo.weathervisualizer.domain.holder.WeatherInfoStateHolder
 import com.torrydo.weathervisualizer.domain.repository.MapRepository
-import com.torrydo.weathervisualizer.domain.repository.MarkerRepository
+import com.torrydo.weathervisualizer.domain.repository.LocalMarkerRepository
 import com.torrydo.weathervisualizer.domain.repository.WeatherRepository
 import com.torrydo.weathervisualizer.domain.weather.WeatherData
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import org.orbitmvi.orbit.ContainerHost
@@ -26,7 +25,7 @@ import java.util.*
 class WeatherMapViewModel(
     private val weatherInfoStateHolder: WeatherInfoStateHolder,
     private val weatherRepository: WeatherRepository,
-    private val markerRepository: MarkerRepository,
+    private val localMarkerRepository: LocalMarkerRepository,
     private val mapRepository: MapRepository
 ) : ContainerHost<WeatherMapState, WeatherMapSideEffect>, BaseViewModel() {
 
@@ -38,7 +37,7 @@ class WeatherMapViewModel(
 
     private fun updateWeatherListState() = ioScope {
         weatherInfoStateHolder.state
-            .combine(markerRepository.getAllMarkers()) { weatherInfo, markerEntities ->
+            .combine(localMarkerRepository.getAllMarkers()) { weatherInfo, markerEntities ->
 
                 val cur = weatherInfo.currentWeather ?: return@combine
 
@@ -76,14 +75,14 @@ class WeatherMapViewModel(
             long = latLng.longitude
         ).onSuccess {
             val cur = it?.currentWeather ?: return@onSuccess
-            markerRepository.insertMarker(cur.lat, cur.lng)
+            localMarkerRepository.insertMarker(cur.lat, cur.lng)
         }
     }
 
     fun removeMarker(latLng: LatLng) = intent {
         val pos = state.weathers.indexOfFirst { it.getLatLng() == latLng }
         if (pos > 0) {
-            markerRepository.deleteMarkerByLatLng(latLng.latitude, latLng.longitude)
+            localMarkerRepository.deleteMarkerByLatLng(latLng.latitude, latLng.longitude)
         }else{
             postSideEffect(WeatherMapSideEffect.AlertCanNotRemoveCurrentMarker)
         }

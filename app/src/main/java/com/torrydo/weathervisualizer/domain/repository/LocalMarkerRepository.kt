@@ -3,7 +3,7 @@ package com.torrydo.weathervisualizer.domain.repository
 import kotlinx.coroutines.flow.Flow
 import maps.markerdb.MarkerEntity
 
-interface MarkerRepository {
+interface LocalMarkerRepository {
 
     suspend fun getMarkerById(id: Long): MarkerEntity?
 

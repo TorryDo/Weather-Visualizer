@@ -1,7 +1,7 @@
 package com.torrydo.weathervisualizer.di
 
 import com.torrydo.weathervisualizer.data.repository.MapRepositoryImpl
-import com.torrydo.weathervisualizer.data.repository.MarkerRepositoryImpl
+import com.torrydo.weathervisualizer.data.repository.LocalMarkerRepositoryImpl
 import com.torrydo.weathervisualizer.ui.screen.current_weather.CurrentWeatherViewModel
 import com.torrydo.weathervisualizer.ui.screen.next7days.Next7DayViewModel
 import com.torrydo.weathervisualizer.ui.screen.weather_map.WeatherMapViewModel
@@ -24,7 +24,7 @@ val viewModel_modules = module {
         WeatherMapViewModel(
             weatherInfoStateHolder = get(),
             weatherRepository = get(),
-            markerRepository = get<MarkerRepositoryImpl>(),
+            localMarkerRepository = get<LocalMarkerRepositoryImpl>(),
             mapRepository = get<MapRepositoryImpl>()
         )
     }
