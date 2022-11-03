@@ -6,6 +6,8 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.serialization' version "$kotlin_version"
 
     id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
+
+    id 'com.squareup.sqldelight'
 }
 
 android {
@@ -68,6 +70,10 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
 
+    // 1.1.5 -> android plugin 4.0.0
+    // 120 -> 730
+    // 2.0.0 -> 740-alpha10
+    // ref: https://developer.android.com/studio/write/java8-support?authuser=2
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
 
     def kotlinx_cotest_version = "1.6.1"
@@ -80,6 +86,10 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
 
     implementation "dev.shreyaspatil:capturable:1.0.3"
+
+    implementation("com.squareup.sqldelight:android-driver:1.5.3")
+    implementation("com.squareup.sqldelight:coroutines-extensions-jvm:1.5.3")
+
 
 
     android_libs()
@@ -98,6 +108,12 @@ dependencies {
 
     my_libs()
 
+}
+
+sqldelight{
+    MarkerDatabase{
+        packageName = "com.torrydo.weathervisualizer"
+    }
 }
 
 private void android_libs() {

@@ -46,10 +46,6 @@ fun WeatherMapScreen() = WithLazyComposeVar {
     // UI ------------------------------------------------------------------------------------------
 
 
-    LaunchedEffectWith(vm.state.collectAsState().value) {
-        Logger.d("${it.weathers.map { it.getLatLng() }}")
-    }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -63,12 +59,17 @@ fun WeatherMapScreen() = WithLazyComposeVar {
                 )
             }
 
-//            var tempLatLng: LatLng? by remember { mutableStateOf(vm.curLatLng.value) }
+            // each time marker added, tempWeather change, therefore cause captureBitmap compose change
             var tempWeather by remember { mutableStateOf(vm.curWeather.value) }
             val captureBitmap = vm.getBitmapByLatLng(cur = tempWeather)
 
-            LaunchedEffect(Unit) {
+            // create bitmap for current weather marker
+            LaunchedEffect(vm.curWeather) {
                 vm.markers[vm.curWeather.value!!.getLatLng()] = captureBitmap.invoke()
+            }
+
+            LaunchedEffectWith(vm.state.collectAsState().value) {
+                Logger.d("weathers: "+it.weathers.map { it.getLatLng() }.toString())
             }
 
 
@@ -84,7 +85,6 @@ fun WeatherMapScreen() = WithLazyComposeVar {
                     vm.onMapCLick(it) { weather ->
                         if (vm.state.value.weathers.contains(weather).not()) {
                             weather.getLatLng().let { ll ->
-//                            tempLatLng = ll
                                 tempWeather = weather
                                 vm.markers[ll] = captureBitmap.invoke()
                             }
@@ -104,17 +104,13 @@ fun WeatherMapScreen() = WithLazyComposeVar {
                             )
                         },
                         onClick = {
-
-                            vm.removeWeatherData(ll)
-
-                            false
+                            vm.removeMarker(ll)
+                            true // IDK What is this, consumed click event?
                         }
                     )
-
                 }
             }
         }
-
     }
 }
 

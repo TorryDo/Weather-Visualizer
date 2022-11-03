@@ -1,0 +1,32 @@
+CREATE TABLE markerEntity (
+    id INTEGER NOT NULL PRIMARY KEY,
+    lat REAL NOT NULL,
+    lng REAL NOT NULL
+);
+
+getMarkerById:
+SELECT *
+FROM markerEntity
+WHERE id = :id;
+
+getMarkerByLatLng:
+SELECT *
+FROM markerEntity
+WHERE lat = :lat AND lng = :lng;
+
+getAllMarkers:
+SELECT *
+FROM markerEntity;
+
+insertMarker:
+INSERT OR REPLACE
+INTO markerEntity
+VALUES (?, ?, ?);
+
+deleteMarkerByLatLng:
+DELETE FROM markerEntity
+WHERE lat = :lat AND lng = :lng;
+
+deleteMarkerById:
+DELETE FROM markerEntity
+WHERE id = :id;
