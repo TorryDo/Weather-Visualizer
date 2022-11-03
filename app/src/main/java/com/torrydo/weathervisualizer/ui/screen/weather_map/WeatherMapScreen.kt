@@ -24,7 +24,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.*
-import com.torrydo.compose_easier.ext.LaunchedEffectWith
 import com.torrydo.compose_easier.view.IconEz
 import com.torrydo.weathervisualizer.common.base.WithLazyComposeVar
 import com.torrydo.weathervisualizer.domain.weather.WeatherData
@@ -45,69 +44,56 @@ fun WeatherMapScreen() = WithLazyComposeVar {
 
     // UI ------------------------------------------------------------------------------------------
 
+    vm.state.collectAsState().value.weathers.apply {
+        // TODO: if bitmap key not exist inside weathers, remove
+        Logger.d("importing bitmap: ${this.map { it.getLatLng() }}")
+        this.forEach {
+            val ll = it.getLatLng()
+            if(vm.markerAndBmMap[ll] == null){
+                vm.markerAndBmMap[ll] = getBitmapByWeather(it).invoke()
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.DarkGray)
     ) {
-
-        if (vm.curWeather.collectAsState().value != null) {
-            val cameraPositionState = rememberCameraPositionState {
-                position = CameraPosition.fromLatLngZoom(
-                    vm.curWeather.value!!.getLatLng(), 10f
-                )
-            }
-
-            // each time marker added, tempWeather change, therefore cause captureBitmap compose change
-            var tempWeather by remember { mutableStateOf(vm.curWeather.value) }
-            val captureBitmap = vm.getBitmapByLatLng(cur = tempWeather)
-
-            // create bitmap for current weather marker
-            LaunchedEffect(vm.curWeather) {
-                vm.markers[vm.curWeather.value!!.getLatLng()] = captureBitmap.invoke()
-            }
-
-            LaunchedEffectWith(vm.state.collectAsState().value) {
-                Logger.d("weathers: "+it.weathers.map { it.getLatLng() }.toString())
-            }
-
-
-            GoogleMap(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxSize()
-                    .clip(MaterialTheme.shapes.small),
-                cameraPositionState = cameraPositionState,
-                properties = MapProperties(mapStyleOptions = MapStyleOptions(GoogleMapStyle.SIMPLE)),
-                onMapClick = {
-
-                    vm.onMapCLick(it) { weather ->
-                        if (vm.state.value.weathers.contains(weather).not()) {
-                            weather.getLatLng().let { ll ->
-                                tempWeather = weather
-                                vm.markers[ll] = captureBitmap.invoke()
-                            }
-                        }
-                    }
-
-                },
-            ) {
-
-                for (ll in vm.state.collectAsState().value.weathers.map { it.getLatLng() }) {
-
-                    MarkerInfoWindow(
-                        state = MarkerState(ll),
-                        icon = vm.markers[ll]?.let {
-                            BitmapDescriptorFactory.fromBitmap(
-                                it
-                            )
-                        },
-                        onClick = {
-                            vm.removeMarker(ll)
-                            true // IDK What is this, consumed click event?
-                        }
+        vm.state.collectAsState().value.weathers.let { weathers ->
+//            Logger.d("weathers: ${weathers.map { it.getLatLng() }}")
+            if (weathers.isNotEmpty()) {
+                val cameraPositionState = rememberCameraPositionState {
+                    position = CameraPosition.fromLatLngZoom(
+                        weathers[0].getLatLng(), 10f
                     )
+                }
+
+                GoogleMap(
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .fillMaxSize()
+                        .clip(MaterialTheme.shapes.small),
+                    cameraPositionState = cameraPositionState,
+                    properties = MapProperties(mapStyleOptions = MapStyleOptions(GoogleMapStyle.SIMPLE)),
+                    onMapClick = vm::onMapCLick
+                ) {
+
+                    for (ll in vm.state.collectAsState().value.weathers.map { it.getLatLng() }) {
+                        MarkerInfoWindow(
+                            state = MarkerState(ll),
+                            icon = vm.markerAndBmMap[ll]?.let {
+                                BitmapDescriptorFactory.fromBitmap(
+                                    it
+                                )
+                            },
+                            onClick = {
+                                vm.removeMarker(ll)
+                                true
+                            }
+                        )
+
+                    }
                 }
             }
         }
@@ -115,7 +101,7 @@ fun WeatherMapScreen() = WithLazyComposeVar {
 }
 
 @Composable
-private fun WeatherMapViewModel.getBitmapByLatLng(cur: WeatherData?): () -> Bitmap? {
+private fun getBitmapByWeather(cur: WeatherData?): () -> Bitmap? {
 
     if (cur == null) return { null }
 
