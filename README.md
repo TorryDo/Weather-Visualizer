@@ -15,8 +15,8 @@ a weather app that using MVI pattern and clean architecture
 
 ### 2, Features
 -	Show current weather condition
--	Add Location to tracking
--	Display weather condition on maps
+-	Add Locations to see the weathers
+-	Display multiple weather markers on the map
 -	Dislay weather conditions in the next 7 days
 
 
